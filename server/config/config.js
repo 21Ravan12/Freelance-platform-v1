@@ -2,8 +2,8 @@ module.exports = {
   mongoUri: "mongodb://localhost:27017",
   dbName: "freelancePlartform",
   emailCredentials: {
-    user: "asgarovravan@gmail.com",
-    pass: "cwyubjzfwgkhrqvp",
+    user: "",
+    pass: "",
   },
   jwtConfig: {
     secret: process.env.JWT_SECRET || "default_secret_key",
