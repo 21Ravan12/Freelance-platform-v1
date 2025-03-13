@@ -36,7 +36,7 @@ const credentials = { key: privateKey, cert: certificate };
 
 const PORT = process.env.PORT || 3003;
 const server = https.createServer(credentials, app).listen(PORT, '0.0.0.0', () => {
-  console.log(`HTTPS server running on https://192.168.0.158:${PORT}`);
+  console.log(`HTTPS server running on ${PORT}`);
 });
 
 const io = new Server(server, {
