@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import { Navbar } from "../../../components/Navbar";
+import { Sidebar } from "../../../components/Sidebar";
 
 type TranslationKeys = {
   title: string;
@@ -21,6 +23,18 @@ type TranslationKeys = {
   deleteWarning: string;
   back: string;
   saveChanges: string;
+  dashboard: string;
+  profile: string;
+  projects: string;
+  messages: string;
+  analytics: string;
+  settings: string; 
+  logout: string;
+  applyProjects: string;
+  jobListings: string;
+  createProject: string;
+  hireFreelancers: string;
+  manageJobs: string;
 };
 
 const translations: Record<string, TranslationKeys> = {
@@ -41,6 +55,18 @@ const translations: Record<string, TranslationKeys> = {
     deleteWarning: "Deleting your account will remove all your data permanently. This action cannot be undone.",
     back: "Back",
     saveChanges: "Save Changes",
+    dashboard: "Dashboard",
+    profile: "Profile",
+    projects: "Projects",
+    messages: "Messages",
+    analytics: "Analytics",
+    settings: "Settings",
+    logout: "Logout",
+    applyProjects: "Apply Projects",
+    jobListings: "Job Listings",
+    createProject: "Create Project",
+    hireFreelancers: "Hire Freelancers",
+    manageJobs: "Manage Jobs",
   },
   tr: {
     title: "Hesap Ayarları",
@@ -59,6 +85,18 @@ const translations: Record<string, TranslationKeys> = {
     deleteWarning: "Hesabınızı silmek, tüm verilerinizi kalıcı olarak kaldıracaktır. Bu işlem geri alınamaz.",
     back: "Geri",
     saveChanges: "Değişiklikleri Kaydet",
+    dashboard: "Panel",
+    profile: "Profil",
+    projects: "Projeler",
+    messages: "Mesajlar",
+    analytics: "Analizler",
+    settings: "Ayarlar",
+    logout: "Çıkış Yap",
+    applyProjects: "Projelere Başvur",
+    jobListings: "İş İlanları",
+    createProject: "Proje Oluştur",
+    hireFreelancers: "Freelancer Bul",
+    manageJobs: "İşleri Yönet",
   },
   az: {
     title: "Hesab Tənzimləmələri",
@@ -77,6 +115,18 @@ const translations: Record<string, TranslationKeys> = {
     deleteWarning: "Hesabınızı silmək, bütün məlumatlarınızı qalıcı olaraq siləcək. Bu əməliyyat geri qaytarıla bilməz.",
     back: "Geri",
     saveChanges: "Dəyişiklikləri Yadda Saxla",
+    dashboard: "İdarə Paneli",
+    profile: "Profil",
+    projects: "Layihələr",
+    messages: "Mesajlar",
+    analytics: "Analitika",
+    settings: "Parametrlər",
+    logout: "Çıxış",
+    applyProjects: "Layihələrə müraciət",
+    jobListings: "Vakansiyalar",
+    createProject: "Layihə yarat",
+    hireFreelancers: "Freelancer tap",
+    manageJobs: "İşləri idarə et",
   },
 };
 
@@ -84,21 +134,34 @@ const SettingsPage = () => {
   const router = useRouter();
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
-  const [theme, setTheme] = useState("light");
-  const [language, setLanguage] = useState("en");
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [language, setLanguage] = useState<"en" | "tr" | "az">("en");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [userRole, setUserRole] = useState("user");
 
   const t = translations[language as keyof typeof translations];
 
   useEffect(() => {
+    const savedUserRole = localStorage.getItem("userRole");
+    setUserRole(savedUserRole || "user");
     document.body.className = theme === "dark" ? "bg-gray-900 text-white" : "bg-white text-gray-900";
-
     localStorage.setItem("language", language);
   }, [theme, language]);
+
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
+  const toggleNotifications = () => {
+    setNotificationsOpen(!notificationsOpen);
+  };
 
   const handleSave = async () => {
     try {
@@ -241,166 +304,201 @@ const SettingsPage = () => {
   };
 
   return (
-    <div className={`min-h-screen w-full flex flex-col items-center justify-center p-8 ${theme === "dark" ? "bg-gray-900" : "bg-gray-100"}`}>
-      <motion.div
-        initial={{ opacity: 0, y: -50 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-        className={`w-full max-w-4xl ${theme === "dark" ? "bg-gray-800" : "bg-white"} bg-opacity-90 backdrop-blur-lg rounded-3xl shadow-2xl p-8 space-y-8`}
-      >
-        <h1 className={`text-4xl font-extrabold text-center ${theme === "dark" ? "text-white" : "text-gray-800"}`}>
-          {t.title}
-        </h1>
-        {error && (
-          <p className="text-red-500 text-center font-medium">{error}</p>
-        )}
-        {success && (
-          <p className="text-green-500 text-center font-medium">{success}</p>
-        )}
-
-        <div className="space-y-6">
-          {/* Bildirim Ayarları */}
-          <div className={`p-6 rounded-xl shadow-inner ${theme === "dark" ? "bg-gray-700" : "bg-gray-50"}`}>
-            <h2 className={`text-2xl font-semibold mb-4 ${theme === "dark" ? "text-white" : "text-gray-800"}`}>
-              {t.notifications}
-            </h2>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <label className={`text-sm font-medium ${theme === "dark" ? "text-gray-300" : "text-gray-700"}`}>
-                  {t.enableNotifications}
-                </label>
-                <input
-                  type="checkbox"
-                  checked={notificationsEnabled}
-                  onChange={(e) => setNotificationsEnabled(e.target.checked)}
-                  className="h-5 w-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
-                />
+    <div className={`flex h-screen ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-800'}`}>
+      <Sidebar 
+        theme={theme}
+        translations={t}
+        sidebarOpen={sidebarOpen}
+        toggleSidebar={toggleSidebar}
+        userType={userRole}
+        language={language}
+      />
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-10 lg:hidden" // Hide on large screens when sidebar is permanent
+          onClick={toggleSidebar}
+        />
+      )}
+  
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <Navbar
+          theme={theme}
+          language={language}
+          userRole={userRole}
+          unreadCount={unreadCount}
+          sidebarOpen={sidebarOpen}
+          toggleSidebar={toggleSidebar}
+          toggleNotifications={toggleNotifications}
+          notificationsOpen={notificationsOpen}
+          toggleTheme={() => {
+            const newTheme = theme === 'dark' ? 'light' : 'dark';
+            setTheme(newTheme);
+            localStorage.setItem("theme", newTheme);
+            document.body.className = newTheme === "dark" ? "bg-gray-900 text-white" : "bg-white text-gray-900";
+          }}
+          setLanguage={(newLanguage: string) => {
+            setLanguage(newLanguage as "en" | "tr" | "az");
+            localStorage.setItem("language", newLanguage);
+          }}
+        />
+        <main className="flex-1 overflow-y-auto p-4 md:p-6">
+          <motion.div
+            initial={{ opacity: 0, y: -50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className={`w-full max-w-4xl mx-auto ${theme === "dark" ? "bg-gray-800" : "bg-white"} bg-opacity-90 backdrop-blur-lg rounded-3xl shadow-2xl p-6 md:p-8 space-y-6`}
+          >
+            <h1 className={`text-3xl md:text-4xl font-extrabold text-center ${theme === "dark" ? "text-white" : "text-gray-800"} mb-6`}>
+              {t.title}
+            </h1>
+            
+            {error && (
+              <div className="p-3 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg text-center font-medium">
+                {error}
               </div>
-            </div>
-          </div>
-
-          {/* Güvenlik Ayarları */}
-          <div className={`p-6 rounded-xl shadow-inner ${theme === "dark" ? "bg-gray-700" : "bg-gray-50"}`}>
-            <h2 className={`text-2xl font-semibold mb-4 ${theme === "dark" ? "text-white" : "text-gray-800"}`}>
-              {t.security}
-            </h2>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <label className={`text-sm font-medium ${theme === "dark" ? "text-gray-300" : "text-gray-700"}`}>
-                  {t.enable2FA}
-                </label>
-                <input
-                  type="checkbox"
-                  checked={twoFactorEnabled}
-                  onChange={(e) => setTwoFactorEnabled(e.target.checked)}
-                  className="h-5 w-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
-                />
+            )}
+            {success && (
+              <div className="p-3 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-lg text-center font-medium">
+                {success}
               </div>
-              <div>
-                <label className={`block text-sm font-medium ${theme === "dark" ? "text-gray-300" : "text-gray-700"}`}>
-                  {t.changePassword}
-                </label>
-                <input
-                  type="password"
-                  value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)}
-                  placeholder={t.currentPassword}
-                  className={`mt-1 block w-full px-4 py-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all ${theme === "dark" ? "bg-gray-600 border-gray-500 text-white" : "bg-white border-gray-300 text-gray-900"}`}
-                />
-                <input
-                  type="password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder={t.newPassword}
-                  className={`mt-2 block w-full px-4 py-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all ${theme === "dark" ? "bg-gray-600 border-gray-500 text-white" : "bg-white border-gray-300 text-gray-900"}`}
-                />
-                <input
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder={t.confirmPassword}
-                  className={`mt-2 block w-full px-4 py-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all ${theme === "dark" ? "bg-gray-600 border-gray-500 text-white" : "bg-white border-gray-300 text-gray-900"}`}
-                />
+            )}
+  
+            <div className="space-y-5">
+              {/* Notification Settings */}
+              <div className={`p-5 rounded-xl ${theme === "dark" ? "bg-gray-700" : "bg-gray-50"} shadow-sm`}>
+                <h2 className={`text-xl font-semibold mb-3 ${theme === "dark" ? "text-white" : "text-gray-800"}`}>
+                  {t.notifications}
+                </h2>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between py-2">
+                    <label className={`flex-1 text-sm font-medium ${theme === "dark" ? "text-gray-300" : "text-gray-700"}`}>
+                      {t.enableNotifications}
+                    </label>
+                   
+                  </div>
+                </div>
+              </div>
+  
+              {/* Security Settings */}
+              <div className={`p-5 rounded-xl ${theme === "dark" ? "bg-gray-700" : "bg-gray-50"} shadow-sm`}>
+                <h2 className={`text-xl font-semibold mb-3 ${theme === "dark" ? "text-white" : "text-gray-800"}`}>
+                  {t.security}
+                </h2>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between py-2">
+                    <label className={`flex-1 text-sm font-medium ${theme === "dark" ? "text-gray-300" : "text-gray-700"}`}>
+                      {t.enable2FA}
+                    </label>
+                  </div>
+                  
+                  <div className="pt-2 border-t border-gray-300 dark:border-gray-600">
+                    <h3 className={`text-sm font-medium mb-3 ${theme === "dark" ? "text-gray-300" : "text-gray-700"}`}>
+                      {t.changePassword}
+                    </h3>
+                    <div className="space-y-3">
+                      <input
+                        type="password"
+                        value={currentPassword}
+                        onChange={(e) => setCurrentPassword(e.target.value)}
+                        placeholder={t.currentPassword}
+                        className={`block w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all ${theme === "dark" ? "bg-gray-600 border-gray-500 text-white placeholder-gray-400" : "bg-white border-gray-300 text-gray-900 placeholder-gray-500"}`}
+                      />
+                      <input
+                        type="password"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        placeholder={t.newPassword}
+                        className={`block w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all ${theme === "dark" ? "bg-gray-600 border-gray-500 text-white placeholder-gray-400" : "bg-white border-gray-300 text-gray-900 placeholder-gray-500"}`}
+                      />
+                      <input
+                        type="password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        placeholder={t.confirmPassword}
+                        className={`block w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all ${theme === "dark" ? "bg-gray-600 border-gray-500 text-white placeholder-gray-400" : "bg-white border-gray-300 text-gray-900 placeholder-gray-500"}`}
+                      />
+                      <button
+                        onClick={handleChangePassword}
+                        className="w-full md:w-auto mt-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all shadow-md"
+                      >
+                        {t.changePassword}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+  
+              {/* Appearance and Language Settings */}
+              <div className={`p-5 rounded-xl ${theme === "dark" ? "bg-gray-700" : "bg-gray-50"} shadow-sm`}>
+                <h2 className={`text-xl font-semibold mb-3 ${theme === "dark" ? "text-white" : "text-gray-800"}`}>
+                  {t.appearance}
+                </h2>
+                <div className="space-y-4">
+                  <div>
+                    <label className={`block text-sm font-medium mb-1 ${theme === "dark" ? "text-gray-300" : "text-gray-700"}`}>
+                      {t.theme}
+                    </label>
+                    <select
+                      value={theme}
+                      onChange={(e) => setTheme(e.target.value as "light" | "dark")}
+                      className={`block w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all ${theme === "dark" ? "bg-gray-600 border-gray-500 text-white" : "bg-white border-gray-300 text-gray-900"}`}
+                    >
+                      <option value="light">Light</option>
+                      <option value="dark">Dark</option>
+                      <option value="system">System Default</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className={`block text-sm font-medium mb-1 ${theme === "dark" ? "text-gray-300" : "text-gray-700"}`}>
+                      {t.language}
+                    </label>
+                    <select
+                      value={language}
+                      onChange={(e) => setLanguage(e.target.value as "en" | "tr" | "az")}
+                      className={`block w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all ${theme === "dark" ? "bg-gray-600 border-gray-500 text-white" : "bg-white border-gray-300 text-gray-900"}`}
+                    >
+                      <option value="en">English</option>
+                      <option value="tr">Türkçe</option>
+                      <option value="az">Azərbaycan</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+  
+              {/* Account Deletion */}
+              <div className={`p-5 rounded-xl ${theme === "dark" ? "bg-gray-700" : "bg-gray-50"} shadow-sm`}>
+                <h2 className={`text-xl font-semibold mb-3 ${theme === "dark" ? "text-white" : "text-gray-800"}`}>
+                  {t.deleteAccount}
+                </h2>
+                <p className={`text-sm mb-4 ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
+                  {t.deleteWarning}
+                </p>
                 <button
-                  onClick={handleChangePassword}
-                  className="mt-4 px-6 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all shadow-lg"
+                  onClick={handleDeleteAccount}
+                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all shadow-md"
                 >
-                  {t.changePassword}
+                  {t.deleteAccount}
                 </button>
               </div>
             </div>
-          </div>
-
-          {/* Tema ve Dil Ayarları */}
-          <div className={`p-6 rounded-xl shadow-inner ${theme === "dark" ? "bg-gray-700" : "bg-gray-50"}`}>
-            <h2 className={`text-2xl font-semibold mb-4 ${theme === "dark" ? "text-white" : "text-gray-800"}`}>
-              {t.appearance}
-            </h2>
-            <div className="space-y-4">
-              <div>
-                <label className={`block text-sm font-medium ${theme === "dark" ? "text-gray-300" : "text-gray-700"}`}>
-                  {t.theme}
-                </label>
-                <select
-                  value={theme}
-                  onChange={(e) => setTheme(e.target.value)}
-                  className={`mt-1 block w-full px-4 py-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all ${theme === "dark" ? "bg-gray-600 border-gray-500 text-white" : "bg-white border-gray-300 text-gray-900"}`}
-                >
-                  <option value="light">Light</option>
-                  <option value="dark">Dark</option>
-                  <option value="system">System Default</option>
-                </select>
-              </div>
-              <div>
-                <label className={`block text-sm font-medium ${theme === "dark" ? "text-gray-300" : "text-gray-700"}`}>
-                  {t.language}
-                </label>
-                <select
-                  value={language}
-                  onChange={(e) => setLanguage(e.target.value)}
-                  className={`mt-1 block w-full px-4 py-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all ${theme === "dark" ? "bg-gray-600 border-gray-500 text-white" : "bg-white border-gray-300 text-gray-900"}`}
-                >
-                  <option value="en">English</option>
-                  <option value="tr">Türkçe</option>
-                  <option value="az">Azərbaycan</option>
-                </select>
-              </div>
+  
+            <div className="flex flex-col-reverse md:flex-row justify-between items-center gap-4 pt-6">
+              <button
+                onClick={() => router.push("/pages/dashboard/main")}
+                className="w-full md:w-auto px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-all shadow-md"
+              >
+                {t.back}
+              </button>
+              <button
+                onClick={handleSave}
+                className="w-full md:w-auto px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all shadow-md"
+              >
+                {t.saveChanges}
+              </button>
             </div>
-          </div>
-
-          {/* Hesap Silme */}
-          <div className={`p-6 rounded-xl shadow-inner ${theme === "dark" ? "bg-gray-700" : "bg-gray-50"}`}>
-            <h2 className={`text-2xl font-semibold mb-4 ${theme === "dark" ? "text-white" : "text-gray-800"}`}>
-              {t.deleteAccount}
-            </h2>
-            <p className={`text-sm mb-4 ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
-              {t.deleteWarning}
-            </p>
-            <button
-              onClick={handleDeleteAccount}
-              className="px-6 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:from-red-600 hover:to-red-700 transition-all shadow-lg"
-            >
-              {t.deleteAccount}
-            </button>
-          </div>
-        </div>
-
-        <div className="flex justify-between items-center">
-        <button
-            onClick={() => router.push("/pages/dashboard/main")}
-            className="px-6 py-2 bg-gradient-to-r from-gray-500 to-gray-600 text-white rounded-lg hover:from-gray-600 hover:to-gray-700 transition-all shadow-lg"
-          >
-            {t.back}
-        </button>
-          <button
-            onClick={handleSave}
-            className="px-6 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all shadow-lg"
-          >
-            {t.saveChanges}
-          </button>
-        </div>
-
-      </motion.div>
+          </motion.div>
+        </main>
+      </div>
     </div>
   );
 };
